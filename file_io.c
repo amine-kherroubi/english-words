@@ -69,3 +69,33 @@ int load_words_from_file(const char *filename) {
 
   return word_count;
 }
+
+bool save_word_to_file(const char *word) {
+  FILE *file = fopen("words.txt", "a");
+  if (file == NULL) {
+    return false;
+  }
+
+  fprintf(file, "%s\n", word);
+  fclose(file);
+  return true;
+}
+
+bool save_all_words_to_file(void) {
+  FILE *file = fopen("words.txt", "w");
+  if (file == NULL) {
+    return false;
+  }
+
+  /* Write all words from all lists */
+  for (int i = 0; i < ALPHABET_SIZE; i++) {
+    WordNode *current = g_word_lists[i].head;
+    while (current != NULL) {
+      fprintf(file, "%s\n", current->original_word);
+      current = current->next;
+    }
+  }
+
+  fclose(file);
+  return true;
+}

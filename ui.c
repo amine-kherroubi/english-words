@@ -43,7 +43,8 @@ void ui_display_menu(void) {
   fflush(stdout);
 }
 
-void handle_print_word_data(void) {
+void handle_print_word_data(Statistics *stats) {
+  (void)stats; /* Unused parameter */
   char word[MAX_WORD_LENGTH];
   char input[MAX_WORD_LENGTH + 10];
 
@@ -72,8 +73,16 @@ void handle_print_word_data(void) {
 
   ui_clear_screen();
 
-  int index = get_word_letter_index(word);
-  WordNode *node = search_word(g_word_lists[index].head, word);
+  /* Remove slashes for searching since clean_word is stored */
+  char *clean = remove_slashes(word);
+  if (clean == NULL) {
+    puts("Error allocating memory.");
+    return;
+  }
+
+  int index = get_word_letter_index(clean);
+  WordNode *node = search_word(g_word_lists[index].head, clean);
+  free(clean);
 
   if (node == NULL) {
     puts("This word does not exist in the dictionary.");
@@ -131,7 +140,7 @@ void handle_print_anagrams(int link_count) {
   }
 }
 
-void handle_insert_word(void) {
+void handle_insert_word(Statistics *stats) {
   char word[MAX_WORD_LENGTH];
   char input[MAX_WORD_LENGTH + 10];
 
@@ -161,15 +170,41 @@ void handle_insert_word(void) {
   ui_clear_screen();
 
   int index = get_word_letter_index(word);
-  if (search_word(g_word_lists[index].head, word) != NULL) {
+
+  /* Need to check with clean word since that's what's stored */
+  char *clean = remove_slashes(word);
+  if (clean == NULL) {
+    puts("Error allocating memory.");
+    return;
+  }
+
+  WordNode *existing = search_word(g_word_lists[index].head, clean);
+  free(clean);
+
+  if (existing != NULL) {
     puts("This word already exists.");
   } else {
     insert_word_sorted_by_length(&g_word_lists[index].head, word);
-    puts("Word successfully added.");
+
+    /* Save to file */
+    if (save_word_to_file(word)) {
+      puts("Word successfully added and saved to words.txt");
+
+      /* Recalculate relationships */
+      printf("Recalculating relationships...\n");
+      stats->subword_links = create_subword_links();
+      stats->verb_form_links = create_verb_form_links();
+      stats->lexclose_links = create_lexically_close_links();
+      stats->anagram_links = create_anagram_links();
+      stats->word_count++;
+      printf("Done!\n");
+    } else {
+      puts("Word added but failed to save to file.");
+    }
   }
 }
 
-void handle_delete_word(void) {
+void handle_delete_word(Statistics *stats) {
   char word[MAX_WORD_LENGTH];
   char input[MAX_WORD_LENGTH + 10];
 
@@ -198,9 +233,33 @@ void handle_delete_word(void) {
 
   ui_clear_screen();
 
-  int index = get_word_letter_index(word);
-  if (delete_word_from_list(&g_word_lists[index].head, word)) {
-    puts("Word successfully deleted.");
+  /* Remove slashes for searching since clean_word is stored */
+  char *clean = remove_slashes(word);
+  if (clean == NULL) {
+    puts("Error allocating memory.");
+    return;
+  }
+
+  int index = get_word_letter_index(clean);
+  bool deleted = delete_word_from_list(&g_word_lists[index].head, clean);
+  free(clean);
+
+  if (deleted) {
+    /* Save all words back to file */
+    if (save_all_words_to_file()) {
+      puts("Word successfully deleted and changes saved to words.txt");
+
+      /* Recalculate relationships */
+      printf("Recalculating relationships...\n");
+      stats->subword_links = create_subword_links();
+      stats->verb_form_links = create_verb_form_links();
+      stats->lexclose_links = create_lexically_close_links();
+      stats->anagram_links = create_anagram_links();
+      stats->word_count--;
+      printf("Done!\n");
+    } else {
+      puts("Word deleted but failed to save changes to file.");
+    }
   } else {
     puts("This word does not exist.");
   }
@@ -217,7 +276,7 @@ void handle_print_stats(const Statistics *stats) {
   printf("Anagram links created:         %d\n", stats->anagram_links);
 }
 
-void ui_main_menu_loop(const Statistics *stats) {
+void ui_main_menu_loop(Statistics *stats) {
   char input[100];
   int choice;
 
@@ -241,7 +300,7 @@ void ui_main_menu_loop(const Statistics *stats) {
 
     switch (choice) {
     case MENU_PRINT_WORD_DATA:
-      handle_print_word_data();
+      handle_print_word_data(stats);
       ui_wait_for_enter();
       ui_clear_screen();
       print_all_word_lists();
@@ -283,14 +342,14 @@ void ui_main_menu_loop(const Statistics *stats) {
       break;
 
     case MENU_INSERT_WORD:
-      handle_insert_word();
+      handle_insert_word(stats);
       ui_wait_for_enter();
       ui_clear_screen();
       print_all_word_lists();
       break;
 
     case MENU_DELETE_WORD:
-      handle_delete_word();
+      handle_delete_word(stats);
       ui_wait_for_enter();
       ui_clear_screen();
       print_all_word_lists();
