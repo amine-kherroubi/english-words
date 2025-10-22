@@ -2,6 +2,31 @@
 
 A C program that analyzes English words and discovers linguistic relationships including subwords, verb conjugations, lexical proximity, and anagrams.
 
+## Recent Improvements (2025 Refactored Version)
+
+### Memory & Safety
+- **Better error handling** - Added ErrorCode enumeration for clearer error tracking
+- **Fixed memory leaks** - Proper cleanup in verb form generation functions
+- **Improved buffer safety** - Better bounds checking throughout
+- **Enhanced null checking** - All functions now validate input pointers
+
+### Algorithm Improvements
+- **Circular chain detection** - Prevents infinite loops in relationship chains (display.c)
+- **Robust word validation** - Added `is_valid_word_format()` function
+- **Better file I/O** - More robust file reading with validation
+- **Safer string operations** - Using `strncpy` and proper null termination
+
+### Code Quality
+- **Const correctness** - Better use of const qualifiers
+- **Cleaner casting** - Proper use of unsigned char casts for ctype functions
+- **Better documentation** - Improved comments and function headers
+- **Error messages** - More informative error reporting with perror()
+
+### Performance
+- **Optimized comparisons** - More efficient string comparison algorithms
+- **Better memory allocation** - Accurate buffer size calculations
+- **Input validation** - Early rejection of invalid input
+
 ## Features
 
 - **Word Analysis** - Count characters, vowels, consonants, and syllables
@@ -83,13 +108,21 @@ ed/u/ca/tion
 ### Algorithms
 - **Subword Detection** - Pattern matching with separation tracking
 - **Verb Generation** - Rule-based conjugation (CVC doubling, silent-e handling, etc.)
-- **Lexical Distance** - Single-character difference detection
+- **Lexical Distance** - Single-character difference detection with circular chain prevention
 - **Anagram Detection** - Sorted character comparison
 
 ### Constraints
 - Maximum 1000 words
 - Maximum 50 characters per word
 - Maximum 10 characters per syllable
+
+### Error Codes
+- `SUCCESS = 0` - Operation completed successfully
+- `ERROR_FILE_NOT_FOUND = -1` - File not found
+- `ERROR_MEMORY_ALLOCATION = -2` - Memory allocation failed
+- `ERROR_INVALID_INPUT = -3` - Invalid input provided
+- `ERROR_WORD_EXISTS = -4` - Word already exists
+- `ERROR_WORD_NOT_FOUND = -5` - Word not found
 
 ## Requirements
 
@@ -126,9 +159,27 @@ cat --> bat --> hat --> mat --> (end)
 listen --> silent --> enlist --> (end)
 ```
 
-## Project Information
+## Contributing
 
-This academic project originates from École Nationale Supérieure d'Informatique (ESI).
+This is an academic project from École Nationale Supérieure d'Informatique (ESI).
 
-**Original Authors (2023):** Mohamed El Amine Kherroubi, Ahcen Chabbi  
-**Refactored by AI (2025)**
+**Original Authors:** Mohamed El Amine Kherroubi, Ahcen Chabbi  
+**Refactored:** 2025
+
+## Changelog
+
+### Version 2.0 (2025 Refactor)
+- Added comprehensive error handling
+- Fixed memory leaks in verb generation
+- Improved circular chain detection
+- Enhanced input validation
+- Better const correctness
+- More informative error messages
+- Safer string operations
+- Optimized algorithms
+
+### Version 1.0 (Original)
+- Initial implementation
+- Basic word analysis features
+- Relationship detection
+- File I/O operations

@@ -1,8 +1,14 @@
 /**
  * User Interface Implementation
+ *
+ * Improvements:
+ * - Better input validation
+ * - More informative error messages
+ * - Safer string handling
  */
 
 #include "ui.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +21,7 @@
 
 void ui_clear_screen(void) {
   int result = system(CLEAR_COMMAND);
-  (void)result; /* Suppress unused variable warning */
+  (void)result;
 }
 
 void ui_wait_for_enter(void) {
@@ -42,37 +48,53 @@ void ui_display_menu(void) {
   fflush(stdout);
 }
 
-static void handle_print_word_data(Statistics *stats) {
-  (void)stats; /* Unused parameter */
-  char word[MAX_WORD_LENGTH];
-  char input[MAX_WORD_LENGTH + 10];
+static char *read_word_input(const char *prompt) {
+  static char input[MAX_WORD_LENGTH + 10];
+  static char word[MAX_WORD_LENGTH];
 
-  printf("Enter a word: ");
+  printf("%s", prompt);
   fflush(stdout);
 
   if (fgets(input, sizeof(input), stdin) == NULL) {
+    return NULL;
+  }
+
+  /* Remove trailing whitespace */
+  size_t len = strlen(input);
+  while (len > 0 && isspace((unsigned char)input[len - 1])) {
+    input[--len] = '\0';
+  }
+
+  /* Remove leading whitespace */
+  char *start = input;
+  while (*start && isspace((unsigned char)*start)) {
+    start++;
+  }
+
+  if (strlen(start) == 0 || strlen(start) >= MAX_WORD_LENGTH) {
+    return NULL;
+  }
+
+  strncpy(word, start, MAX_WORD_LENGTH - 1);
+  word[MAX_WORD_LENGTH - 1] = '\0';
+
+  return word;
+}
+
+static void handle_print_word_data(Statistics *stats) {
+  (void)stats;
+
+  char *word = read_word_input("Enter a word: ");
+
+  if (word == NULL) {
+    ui_clear_screen();
     puts("Invalid input.");
     return;
   }
 
-  /* Remove trailing newline and extract word */
-  size_t len = strlen(input);
-  if (len > 0 && input[len - 1] == '\n') {
-    input[len - 1] = '\0';
-    len--;
-  }
-
-  if (len == 0 || len >= MAX_WORD_LENGTH) {
-    puts("Invalid word length.");
-    return;
-  }
-
-  strncpy(word, input, MAX_WORD_LENGTH - 1);
-  word[MAX_WORD_LENGTH - 1] = '\0';
-
   ui_clear_screen();
 
-  /* Remove slashes for searching since clean_word is stored */
+  /* Remove slashes for searching */
   char *clean = remove_slashes(word);
   if (clean == NULL) {
     puts("Error allocating memory.");
@@ -146,33 +168,23 @@ static void handle_print_anagrams(int link_count) {
 }
 
 static void handle_insert_word(Statistics *stats) {
-  char word[MAX_WORD_LENGTH];
-  char input[MAX_WORD_LENGTH + 10];
+  char *word =
+      read_word_input("Enter a word to insert (separate syllables with '/'): ");
 
-  printf("Enter a word to insert (separate syllables with '/'): ");
-  fflush(stdout);
-
-  if (fgets(input, sizeof(input), stdin) == NULL) {
+  if (word == NULL) {
+    ui_clear_screen();
     puts("Invalid input.");
     return;
   }
 
-  /* Remove trailing newline and extract word */
-  size_t len = strlen(input);
-  if (len > 0 && input[len - 1] == '\n') {
-    input[len - 1] = '\0';
-    len--;
-  }
+  ui_clear_screen();
 
-  if (len == 0 || len >= MAX_WORD_LENGTH) {
-    puts("Invalid word length.");
+  /* Validate word format */
+  if (!is_valid_word_format(word)) {
+    puts("Invalid word format. Word must contain only letters and '/' "
+         "separators.");
     return;
   }
-
-  strncpy(word, input, MAX_WORD_LENGTH - 1);
-  word[MAX_WORD_LENGTH - 1] = '\0';
-
-  ui_clear_screen();
 
   int index = get_word_letter_index(word);
   if (index < 0 || index > ALPHABET_SIZE) {
@@ -180,7 +192,7 @@ static void handle_insert_word(Statistics *stats) {
     return;
   }
 
-  /* Need to check with clean word since that's what's stored */
+  /* Check with clean word */
   char *clean = remove_slashes(word);
   if (clean == NULL) {
     puts("Error allocating memory.");
@@ -193,7 +205,13 @@ static void handle_insert_word(Statistics *stats) {
   if (existing != NULL) {
     puts("This word already exists.");
   } else {
-    insert_word_sorted_by_length(&g_word_lists[index].head, word);
+    ErrorCode result =
+        insert_word_sorted_by_length(&g_word_lists[index].head, word);
+
+    if (result != SUCCESS) {
+      printf("Failed to insert word (error code: %d).\n", result);
+      return;
+    }
 
     /* Save to file */
     if (save_word_to_file(word)) {
@@ -214,35 +232,17 @@ static void handle_insert_word(Statistics *stats) {
 }
 
 static void handle_delete_word(Statistics *stats) {
-  char word[MAX_WORD_LENGTH];
-  char input[MAX_WORD_LENGTH + 10];
+  char *word = read_word_input("Enter a word to delete: ");
 
-  printf("Enter a word to delete: ");
-  fflush(stdout);
-
-  if (fgets(input, sizeof(input), stdin) == NULL) {
+  if (word == NULL) {
+    ui_clear_screen();
     puts("Invalid input.");
     return;
   }
 
-  /* Remove trailing newline and extract word */
-  size_t len = strlen(input);
-  if (len > 0 && input[len - 1] == '\n') {
-    input[len - 1] = '\0';
-    len--;
-  }
-
-  if (len == 0 || len >= MAX_WORD_LENGTH) {
-    puts("Invalid word length.");
-    return;
-  }
-
-  strncpy(word, input, MAX_WORD_LENGTH - 1);
-  word[MAX_WORD_LENGTH - 1] = '\0';
-
   ui_clear_screen();
 
-  /* Remove slashes for searching since clean_word is stored */
+  /* Remove slashes for searching */
   char *clean = remove_slashes(word);
   if (clean == NULL) {
     puts("Error allocating memory.");
