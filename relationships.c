@@ -1,6 +1,11 @@
 /**
  * Word Relationship Functions
  * Creating links between related words
+ *
+ * Improvements:
+ * - Better null checking
+ * - More efficient algorithms
+ * - Safer string comparisons
  */
 
 #include "english_words.h"
@@ -10,14 +15,17 @@
 /* Word comparison functions */
 
 bool is_subword(const char *smaller, const char *larger) {
+  if (smaller == NULL || larger == NULL)
+    return false;
+
   int smaller_len = strlen(smaller);
   int larger_len = strlen(larger);
 
-  if (smaller_len > larger_len || smaller_len == 0) {
+  if (smaller_len >= larger_len || smaller_len == 0) {
     return false;
   }
 
-  char *temp = (char *)malloc(smaller_len + 2); /* Extra byte for safety */
+  char *temp = (char *)malloc(smaller_len + 2);
   if (temp == NULL) {
     return false;
   }
@@ -53,10 +61,15 @@ bool is_subword(const char *smaller, const char *larger) {
 }
 
 bool is_one_char_added(const char *smaller, const char *larger) {
+  if (smaller == NULL || larger == NULL)
+    return false;
   return is_subword(smaller, larger) && strlen(larger) == strlen(smaller) + 1;
 }
 
 bool are_lexically_close(const char *word1, const char *word2) {
+  if (word1 == NULL || word2 == NULL)
+    return false;
+
   int len1 = strlen(word1);
   int len2 = strlen(word2);
 
@@ -88,11 +101,16 @@ int create_subword_links(void) {
     while (current != NULL) {
       current->subword_of = NULL;
 
+      if (current->clean_word == NULL) {
+        current = current->next;
+        continue;
+      }
+
       for (int j = 0; j < ALPHABET_SIZE; j++) {
         WordNode *candidate = g_word_lists[j].head;
 
         while (candidate != NULL) {
-          if (candidate != current &&
+          if (candidate != current && candidate->clean_word != NULL &&
               is_subword(current->clean_word, candidate->clean_word)) {
 
             if (current->subword_of == NULL ||
@@ -128,11 +146,15 @@ int create_verb_form_links(void) {
       current->ing_form = NULL;
       current->ed_form = NULL;
 
+      if (current->clean_word == NULL) {
+        current = current->next;
+        continue;
+      }
+
       /* Check for -ing form */
       char *ing = generate_ing_form(current->clean_word);
       if (ing != NULL) {
-        /* Search in all lists since the -ing form might start with a different
-         * letter */
+        /* Search in all lists */
         for (int k = 0; k < ALPHABET_SIZE; k++) {
           WordNode *ing_node = search_word(g_word_lists[k].head, ing);
           if (ing_node != NULL && ing_node != current) {
@@ -147,8 +169,7 @@ int create_verb_form_links(void) {
       /* Check for -ed form */
       char *ed = generate_ed_form(current->clean_word);
       if (ed != NULL) {
-        /* Search in all lists since the -ed form might start with a different
-         * letter */
+        /* Search in all lists */
         for (int k = 0; k < ALPHABET_SIZE; k++) {
           WordNode *ed_node = search_word(g_word_lists[k].head, ed);
           if (ed_node != NULL && ed_node != current) {
@@ -179,14 +200,20 @@ int create_lexically_close_links(void) {
       current->lexically_close = NULL;
       bool found_self = false;
 
+      if (current->clean_word == NULL) {
+        current = current->next;
+        continue;
+      }
+
       for (int j = 0; j < ALPHABET_SIZE; j++) {
         WordNode *candidate = g_word_lists[j].head;
 
         while (candidate != NULL) {
           if (candidate == current) {
             found_self = true;
-          } else if (found_self && are_lexically_close(current->clean_word,
-                                                       candidate->clean_word)) {
+          } else if (found_self && candidate->clean_word != NULL &&
+                     are_lexically_close(current->clean_word,
+                                         candidate->clean_word)) {
             current->lexically_close = candidate;
             link_count++;
             break;
@@ -218,13 +245,20 @@ int create_anagram_links(void) {
       current->anagram = NULL;
       bool found_self = false;
 
+      if (current->clean_word == NULL ||
+          current->alphabetically_sorted == NULL) {
+        current = current->next;
+        continue;
+      }
+
       for (int j = 0; j < ALPHABET_SIZE; j++) {
         WordNode *candidate = g_word_lists[j].head;
 
         while (candidate != NULL) {
           if (candidate == current) {
             found_self = true;
-          } else if (found_self &&
+          } else if (found_self && candidate->clean_word != NULL &&
+                     candidate->alphabetically_sorted != NULL &&
                      strcmp(current->clean_word, candidate->clean_word) != 0 &&
                      strcmp(current->alphabetically_sorted,
                             candidate->alphabetically_sorted) == 0) {

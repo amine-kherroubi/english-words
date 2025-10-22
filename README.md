@@ -126,9 +126,9 @@ cat --> bat --> hat --> mat --> (end)
 listen --> silent --> enlist --> (end)
 ```
 
-## Contributing
+## Project Information
 
-This is an academic project from École Nationale Supérieure d'Informatique (ESI).
+This academic project originates from École Nationale Supérieure d'Informatique (ESI).
 
-**Authors:** Mohamed El Amine Kherroubi, Ahcen Chabbi  
-**Refactored:** 2025
+**Original Authors (2023):** Mohamed El Amine Kherroubi, Ahcen Chabbi  
+**Refactored by AI (2025)**

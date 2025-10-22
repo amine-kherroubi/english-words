@@ -1,6 +1,11 @@
 /**
  * English Words Analysis Library
  * Data structures and functions for analyzing English words
+ *
+ * Improvements:
+ * - Better const correctness
+ * - Enhanced error code enumeration
+ * - Improved documentation
  */
 
 #ifndef ENGLISH_WORDS_H
@@ -14,6 +19,17 @@
 #define MAX_SYLLABLE_LENGTH 10
 #define ALPHABET_SIZE 26
 #define MAX_FILENAME_LENGTH 100
+#define INVALID_LIST_INDEX 26
+
+/* Error codes */
+typedef enum {
+  SUCCESS = 0,
+  ERROR_FILE_NOT_FOUND = -1,
+  ERROR_MEMORY_ALLOCATION = -2,
+  ERROR_INVALID_INPUT = -3,
+  ERROR_WORD_EXISTS = -4,
+  ERROR_WORD_NOT_FOUND = -5
+} ErrorCode;
 
 /* Forward declarations */
 typedef struct Syllable Syllable;
@@ -88,6 +104,7 @@ bool is_word_alphabetically_ordered(const char *word);
 char *sort_word_alphabetically(const char *word);
 char *remove_slashes(const char *word);
 int get_word_letter_index(const char *word);
+bool is_valid_word_format(const char *word);
 
 /* Syllable operations */
 Syllable *parse_syllables(const char *word);
@@ -98,7 +115,7 @@ void initialize_word_node(WordNode *node);
 void print_word_details(const WordNode *node);
 
 /* List operations */
-void insert_word_sorted_by_length(WordNode **head, const char *word);
+ErrorCode insert_word_sorted_by_length(WordNode **head, const char *word);
 bool delete_word_from_list(WordNode **head, const char *word);
 WordNode *search_word(const WordNode *head, const char *word);
 void print_word_list(const WordNode *head);

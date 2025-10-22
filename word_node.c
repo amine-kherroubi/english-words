@@ -1,6 +1,11 @@
 /**
  * Word Node Operations
  * Memory management and node manipulation
+ *
+ * Improvements:
+ * - Better error handling in insert function
+ * - Return error codes for better error tracking
+ * - Improved memory cleanup
  */
 
 #include "english_words.h"
@@ -78,6 +83,7 @@ void initialize_word_node(WordNode *node) {
 
   node->clean_word = remove_slashes(node->original_word);
   if (node->clean_word == NULL) {
+    fprintf(stderr, "Error: Failed to create clean word\n");
     return;
   }
 
@@ -89,17 +95,23 @@ void initialize_word_node(WordNode *node) {
   node->is_alphabetically_ordered =
       is_word_alphabetically_ordered(node->clean_word);
   node->alphabetically_sorted = sort_word_alphabetically(node->clean_word);
+
+  if (node->alphabetically_sorted == NULL) {
+    fprintf(stderr, "Error: Failed to create sorted word\n");
+  }
 }
 
 /* Display operations */
 
 void print_word_details(const WordNode *node) {
   if (node == NULL) {
+    printf("Error: NULL word node\n");
     return;
   }
 
   printf("\n=== Word Details ===\n");
-  printf("Word:                      %s\n", node->clean_word);
+  printf("Word:                      %s\n",
+         node->clean_word ? node->clean_word : "(null)");
   printf("Character count:           %d\n", node->char_count);
   printf("Consonant count:           %d\n", node->consonant_count);
   printf("Vowel count:               %d\n", node->vowel_count);
@@ -109,7 +121,8 @@ void print_word_details(const WordNode *node) {
   printf("\n");
   printf("Alphabetically ordered:    %s\n",
          node->is_alphabetically_ordered ? "yes" : "no");
-  printf("Alphabetically sorted:     %s\n", node->alphabetically_sorted);
+  printf("Alphabetically sorted:     %s\n",
+         node->alphabetically_sorted ? node->alphabetically_sorted : "(null)");
 
   /* Print relationships */
   printf("\nRelationships:\n");
@@ -129,25 +142,39 @@ void print_word_details(const WordNode *node) {
 
 /* List operations */
 
-void insert_word_sorted_by_length(WordNode **head, const char *word) {
+ErrorCode insert_word_sorted_by_length(WordNode **head, const char *word) {
+  if (head == NULL || word == NULL) {
+    return ERROR_INVALID_INPUT;
+  }
+
+  if (!is_valid_word_format(word)) {
+    return ERROR_INVALID_INPUT;
+  }
+
   WordNode *new_node = allocate_word_node();
   if (new_node == NULL) {
-    return;
+    return ERROR_MEMORY_ALLOCATION;
   }
 
   new_node->original_word = (char *)malloc(strlen(word) + 1);
   if (new_node->original_word == NULL) {
     free_word_node(new_node);
-    return;
+    return ERROR_MEMORY_ALLOCATION;
   }
 
   strcpy(new_node->original_word, word);
   initialize_word_node(new_node);
 
+  /* Check if initialization succeeded */
+  if (new_node->clean_word == NULL) {
+    free_word_node(new_node);
+    return ERROR_MEMORY_ALLOCATION;
+  }
+
   /* Empty list case */
   if (*head == NULL) {
     *head = new_node;
-    return;
+    return SUCCESS;
   }
 
   /* Insert at beginning if shorter than head */
@@ -155,7 +182,7 @@ void insert_word_sorted_by_length(WordNode **head, const char *word) {
     new_node->next = *head;
     (*head)->prev = new_node;
     *head = new_node;
-    return;
+    return SUCCESS;
   }
 
   /* Find insertion position */
@@ -174,10 +201,11 @@ void insert_word_sorted_by_length(WordNode **head, const char *word) {
   }
 
   current->next = new_node;
+  return SUCCESS;
 }
 
 bool delete_word_from_list(WordNode **head, const char *word) {
-  if (*head == NULL) {
+  if (head == NULL || *head == NULL || word == NULL) {
     return false;
   }
 
@@ -209,9 +237,12 @@ bool delete_word_from_list(WordNode **head, const char *word) {
 }
 
 WordNode *search_word(const WordNode *head, const char *word) {
+  if (word == NULL)
+    return NULL;
+
   const WordNode *current = head;
   while (current != NULL) {
-    if (strcmp(current->clean_word, word) == 0) {
+    if (current->clean_word && strcmp(current->clean_word, word) == 0) {
       return (WordNode *)current;
     }
     current = current->next;
@@ -227,9 +258,11 @@ void print_word_list(const WordNode *head) {
 
   const WordNode *current = head;
   while (current != NULL) {
-    printf("%s", current->clean_word);
-    if (current->next != NULL) {
-      printf(" - ");
+    if (current->clean_word) {
+      printf("%s", current->clean_word);
+      if (current->next != NULL) {
+        printf(" - ");
+      }
     }
     current = current->next;
   }
@@ -257,7 +290,8 @@ void remove_duplicate_words(void) {
       while (checker != NULL) {
         WordNode *next = checker->next;
 
-        if (strcmp(current->clean_word, checker->clean_word) == 0) {
+        if (current->clean_word && checker->clean_word &&
+            strcmp(current->clean_word, checker->clean_word) == 0) {
           /* Remove duplicate */
           if (checker->prev != NULL) {
             checker->prev->next = checker->next;

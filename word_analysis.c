@@ -1,6 +1,11 @@
 /**
  * Word Analysis Functions
  * Character and word-level analysis operations
+ *
+ * Improvements:
+ * - Added word format validation
+ * - Better bounds checking
+ * - Improved const correctness
  */
 
 #include "english_words.h"
@@ -12,22 +17,20 @@
 /* Character operations */
 
 bool is_vowel(char c) {
-  char vowels[] = "aeiouyAEIOUY";
-  for (int i = 0; vowels[i] != '\0'; i++) {
-    if (c == vowels[i]) {
-      return true;
-    }
-  }
-  return false;
+  c = tolower((unsigned char)c);
+  return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' || c == 'y';
 }
 
-bool is_consonant(char c) { return isalpha(c) && !is_vowel(c); }
+bool is_consonant(char c) { return isalpha((unsigned char)c) && !is_vowel(c); }
 
-int get_ascii_code(char c) { return (int)c; }
+int get_ascii_code(char c) { return (int)(unsigned char)c; }
 
 /* Word counting operations */
 
 int count_vowels(const char *word) {
+  if (word == NULL)
+    return 0;
+
   int count = 0;
   for (int i = 0; word[i] != '\0'; i++) {
     if (is_vowel(word[i])) {
@@ -38,6 +41,9 @@ int count_vowels(const char *word) {
 }
 
 int count_consonants(const char *word) {
+  if (word == NULL)
+    return 0;
+
   int count = 0;
   for (int i = 0; word[i] != '\0'; i++) {
     if (is_consonant(word[i])) {
@@ -48,10 +54,15 @@ int count_consonants(const char *word) {
 }
 
 int count_characters(const char *word) {
+  if (word == NULL)
+    return 0;
   return count_vowels(word) + count_consonants(word);
 }
 
 int count_syllables(const char *word) {
+  if (word == NULL)
+    return 0;
+
   int count = 1;
   for (int i = 0; word[i] != '\0'; i++) {
     if (word[i] == '/') {
@@ -64,14 +75,17 @@ int count_syllables(const char *word) {
 /* Word transformation operations */
 
 char *remove_slashes(const char *word) {
-  int len = strlen(word);
+  if (word == NULL)
+    return NULL;
+
+  size_t len = strlen(word);
   char *result = (char *)malloc(len + 1);
   if (result == NULL) {
     return NULL;
   }
 
-  int j = 0;
-  for (int i = 0; i < len; i++) {
+  size_t j = 0;
+  for (size_t i = 0; i < len; i++) {
     if (word[i] != '/') {
       result[j++] = word[i];
     }
@@ -82,9 +96,12 @@ char *remove_slashes(const char *word) {
 }
 
 bool is_word_alphabetically_ordered(const char *word) {
-  int len = strlen(word);
-  for (int i = 0; i < len - 1; i++) {
-    if (tolower(word[i]) > tolower(word[i + 1])) {
+  if (word == NULL || word[0] == '\0')
+    return true;
+
+  size_t len = strlen(word);
+  for (size_t i = 0; i < len - 1; i++) {
+    if (tolower((unsigned char)word[i]) > tolower((unsigned char)word[i + 1])) {
       return false;
     }
   }
@@ -92,7 +109,10 @@ bool is_word_alphabetically_ordered(const char *word) {
 }
 
 char *sort_word_alphabetically(const char *word) {
-  int len = strlen(word);
+  if (word == NULL)
+    return NULL;
+
+  size_t len = strlen(word);
   char *sorted = (char *)malloc(len + 1);
   if (sorted == NULL) {
     return NULL;
@@ -101,9 +121,10 @@ char *sort_word_alphabetically(const char *word) {
   strcpy(sorted, word);
 
   /* Simple bubble sort */
-  for (int i = 0; i < len - 1; i++) {
-    for (int j = i + 1; j < len; j++) {
-      if (tolower(sorted[i]) > tolower(sorted[j])) {
+  for (size_t i = 0; i < len - 1; i++) {
+    for (size_t j = i + 1; j < len; j++) {
+      if (tolower((unsigned char)sorted[i]) >
+          tolower((unsigned char)sorted[j])) {
         char temp = sorted[i];
         sorted[i] = sorted[j];
         sorted[j] = temp;
@@ -114,21 +135,59 @@ char *sort_word_alphabetically(const char *word) {
   return sorted;
 }
 
+bool is_valid_word_format(const char *word) {
+  if (word == NULL || word[0] == '\0')
+    return false;
+
+  /* Check length */
+  size_t len = strlen(word);
+  if (len >= MAX_WORD_LENGTH)
+    return false;
+
+  /* Check for valid characters (letters and slashes only) */
+  for (size_t i = 0; i < len; i++) {
+    if (!isalpha((unsigned char)word[i]) && word[i] != '/') {
+      return false;
+    }
+  }
+
+  /* Check for consecutive slashes */
+  for (size_t i = 0; i < len - 1; i++) {
+    if (word[i] == '/' && word[i + 1] == '/') {
+      return false;
+    }
+  }
+
+  /* Check for leading/trailing slashes */
+  if (word[0] == '/' || word[len - 1] == '/') {
+    return false;
+  }
+
+  return true;
+}
+
 int get_word_letter_index(const char *word) {
+  if (word == NULL || word[0] == '\0') {
+    return INVALID_LIST_INDEX;
+  }
+
   /* Check if word contains only alphabetic characters and slashes */
   for (int i = 0; word[i] != '\0'; i++) {
-    if (!isalpha(word[i]) && word[i] != '/') {
-      return ALPHABET_SIZE; /* Invalid word index */
+    if (!isalpha((unsigned char)word[i]) && word[i] != '/') {
+      return INVALID_LIST_INDEX;
     }
   }
 
   /* Return index based on first letter (0-25 for A-Z) */
-  return toupper(word[0]) - 'A';
+  return toupper((unsigned char)word[0]) - 'A';
 }
 
 /* Syllable operations */
 
 Syllable *parse_syllables(const char *word) {
+  if (word == NULL)
+    return NULL;
+
   Syllable *head = NULL;
   Syllable *tail = NULL;
   char buffer[MAX_SYLLABLE_LENGTH];
@@ -141,10 +200,17 @@ Syllable *parse_syllables(const char *word) {
 
         Syllable *new_syll = allocate_syllable();
         if (new_syll == NULL) {
-          return head;
+          /* Free what we've allocated so far */
+          while (head != NULL) {
+            Syllable *temp = head->next;
+            free_syllable(head);
+            head = temp;
+          }
+          return NULL;
         }
 
-        strcpy(new_syll->text, buffer);
+        strncpy(new_syll->text, buffer, MAX_SYLLABLE_LENGTH - 1);
+        new_syll->text[MAX_SYLLABLE_LENGTH - 1] = '\0';
         new_syll->next = NULL;
 
         if (head == NULL) {
@@ -170,10 +236,17 @@ Syllable *parse_syllables(const char *word) {
 
     Syllable *new_syll = allocate_syllable();
     if (new_syll == NULL) {
-      return head;
+      /* Free what we've allocated so far */
+      while (head != NULL) {
+        Syllable *temp = head->next;
+        free_syllable(head);
+        head = temp;
+      }
+      return NULL;
     }
 
-    strcpy(new_syll->text, buffer);
+    strncpy(new_syll->text, buffer, MAX_SYLLABLE_LENGTH - 1);
+    new_syll->text[MAX_SYLLABLE_LENGTH - 1] = '\0';
     new_syll->next = NULL;
 
     if (head == NULL) {
