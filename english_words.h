@@ -107,6 +107,8 @@ void remove_duplicate_words(void);
 
 /* File operations */
 int load_words_from_file(const char *filename);
+bool save_word_to_file(const char *word);
+bool save_all_words_to_file(void);
 
 /* Relationship creation */
 int create_subword_links(void);

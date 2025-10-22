@@ -21,7 +21,6 @@ void ui_clear_screen(void) {
 void ui_wait_for_enter(void) {
   printf("\nPress ENTER to continue...");
   fflush(stdout);
-  /* Just wait for a single enter - the buffer should already be clean */
   int c;
   while ((c = getchar()) != '\n' && c != EOF)
     ;
@@ -43,7 +42,7 @@ void ui_display_menu(void) {
   fflush(stdout);
 }
 
-void handle_print_word_data(Statistics *stats) {
+static void handle_print_word_data(Statistics *stats) {
   (void)stats; /* Unused parameter */
   char word[MAX_WORD_LENGTH];
   char input[MAX_WORD_LENGTH + 10];
@@ -81,6 +80,12 @@ void handle_print_word_data(Statistics *stats) {
   }
 
   int index = get_word_letter_index(clean);
+  if (index < 0 || index > ALPHABET_SIZE) {
+    puts("Invalid word.");
+    free(clean);
+    return;
+  }
+
   WordNode *node = search_word(g_word_lists[index].head, clean);
   free(clean);
 
@@ -91,7 +96,7 @@ void handle_print_word_data(Statistics *stats) {
   }
 }
 
-void handle_print_subwords(int link_count) {
+static void handle_print_subwords(int link_count) {
   ui_clear_screen();
 
   if (link_count >= 1) {
@@ -102,7 +107,7 @@ void handle_print_subwords(int link_count) {
   }
 }
 
-void handle_print_verb_forms(int link_count) {
+static void handle_print_verb_forms(int link_count) {
   ui_clear_screen();
 
   if (link_count >= 1) {
@@ -113,12 +118,12 @@ void handle_print_verb_forms(int link_count) {
   }
 }
 
-void handle_print_add_one_char(void) {
+static void handle_print_add_one_char(void) {
   ui_clear_screen();
   puts("Feature not yet implemented.");
 }
 
-void handle_print_lexically_close(int link_count) {
+static void handle_print_lexically_close(int link_count) {
   ui_clear_screen();
 
   if (link_count >= 1) {
@@ -129,7 +134,7 @@ void handle_print_lexically_close(int link_count) {
   }
 }
 
-void handle_print_anagrams(int link_count) {
+static void handle_print_anagrams(int link_count) {
   ui_clear_screen();
 
   if (link_count >= 1) {
@@ -140,7 +145,7 @@ void handle_print_anagrams(int link_count) {
   }
 }
 
-void handle_insert_word(Statistics *stats) {
+static void handle_insert_word(Statistics *stats) {
   char word[MAX_WORD_LENGTH];
   char input[MAX_WORD_LENGTH + 10];
 
@@ -170,6 +175,10 @@ void handle_insert_word(Statistics *stats) {
   ui_clear_screen();
 
   int index = get_word_letter_index(word);
+  if (index < 0 || index > ALPHABET_SIZE) {
+    puts("Invalid word.");
+    return;
+  }
 
   /* Need to check with clean word since that's what's stored */
   char *clean = remove_slashes(word);
@@ -204,7 +213,7 @@ void handle_insert_word(Statistics *stats) {
   }
 }
 
-void handle_delete_word(Statistics *stats) {
+static void handle_delete_word(Statistics *stats) {
   char word[MAX_WORD_LENGTH];
   char input[MAX_WORD_LENGTH + 10];
 
@@ -241,6 +250,12 @@ void handle_delete_word(Statistics *stats) {
   }
 
   int index = get_word_letter_index(clean);
+  if (index < 0 || index > ALPHABET_SIZE) {
+    puts("Invalid word.");
+    free(clean);
+    return;
+  }
+
   bool deleted = delete_word_from_list(&g_word_lists[index].head, clean);
   free(clean);
 
@@ -265,7 +280,12 @@ void handle_delete_word(Statistics *stats) {
   }
 }
 
-void handle_print_stats(const Statistics *stats) {
+static void handle_print_stats(const Statistics *stats) {
+  if (stats == NULL) {
+    puts("Error: Statistics not available.");
+    return;
+  }
+
   ui_clear_screen();
 
   puts("=== Statistics ===");
@@ -277,6 +297,11 @@ void handle_print_stats(const Statistics *stats) {
 }
 
 void ui_main_menu_loop(Statistics *stats) {
+  if (stats == NULL) {
+    puts("Error: Statistics not provided.");
+    return;
+  }
+
   char input[100];
   int choice;
 

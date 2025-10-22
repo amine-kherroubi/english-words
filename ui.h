@@ -26,17 +26,6 @@ typedef enum {
 void ui_clear_screen(void);
 void ui_wait_for_enter(void);
 void ui_display_menu(void);
-void ui_main_menu_loop(const Statistics *stats);
-
-/* Menu handlers */
-void handle_print_word_data(void);
-void handle_print_subwords(int link_count);
-void handle_print_verb_forms(int link_count);
-void handle_print_add_one_char(void);
-void handle_print_lexically_close(int link_count);
-void handle_print_anagrams(int link_count);
-void handle_insert_word(void);
-void handle_delete_word(void);
-void handle_print_stats(const Statistics *stats);
+void ui_main_menu_loop(Statistics *stats);
 
 #endif /* UI_H */

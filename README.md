@@ -1,140 +1,134 @@
 # English Words Analysis Program
 
-A C program that analyzes English words and creates various relationships between them, including subwords, verb forms, lexically close words, and anagrams.
+A C program that analyzes English words and discovers linguistic relationships including subwords, verb conjugations, lexical proximity, and anagrams.
 
 ## Features
 
-- **Word Analysis**: Count characters, vowels, consonants, and syllables
-- **Subword Detection**: Find words contained within larger words
-- **Verb Forms**: Generate and link -ing and -ed forms
-- **Lexical Proximity**: Identify words that differ by one character
-- **Anagram Detection**: Find anagrams of words
-- **Alphabetical Ordering**: Check and sort words alphabetically
+- **Word Analysis** - Count characters, vowels, consonants, and syllables
+- **Subword Detection** - Find words contained within larger words (e.g., "art" in "start")
+- **Verb Forms** - Link base verbs with their -ed and -ing forms
+- **Lexical Proximity** - Find words differing by exactly one character
+- **Anagram Detection** - Discover anagrams (e.g., "listen" and "silent")
+- **Dynamic Management** - Insert and delete words with automatic relationship recalculation
 
-## Project Structure
+## Quick Start
 
-```
-├── main.c                 # Main program entry point
-├── english_words.h        # Core data structures and function declarations
-├── ui.h                   # User interface header
-├── ui.c                   # User interface implementation
-├── word_analysis.c        # Character and word analysis functions
-├── word_node.c            # Word node and list operations
-├── file_io.c              # File reading operations
-├── relationships.c        # Word relationship creation
-├── verb_forms.c           # Verb form generation (-ing/-ed)
-├── display.c              # Relationship display functions
-├── Makefile               # Build configuration
-└── README.md              # This file
-```
-
-## Building
-
-### Prerequisites
-- GCC compiler
-- Make utility
-
-### Compilation
-
+### Build
 ```bash
 make
 ```
 
-This will compile all source files and create the `english_words` executable.
-
-### Clean Build
-
+### Run
 ```bash
-make clean    # Remove build artifacts
-make rebuild  # Clean and rebuild
+./english_words
+```
+
+### Clean
+```bash
+make clean      # Remove build artifacts
+make rebuild    # Clean and rebuild
 ```
 
 ## Usage
 
-1. Run the program:
-   ```bash
-   ./english_words
-   ```
+The program loads words from `words.txt` on startup and displays them organized by first letter. Use the interactive menu to explore relationships:
 
-2. Enter the path to your word list file when prompted. The file should contain words separated by whitespace, with syllables separated by slashes (e.g., `hel/lo`).
+| Option | Action                                                  |
+| ------ | ------------------------------------------------------- |
+| **0**  | Display detailed information about a word               |
+| **1**  | Show subword chains                                     |
+| **2**  | Show verb forms (-ed/-ing)                              |
+| **3**  | Show words with one character added *(not implemented)* |
+| **4**  | Show lexically close words                              |
+| **5**  | Show anagrams                                           |
+| **6**  | Insert a new word                                       |
+| **7**  | Delete a word                                           |
+| **8**  | Display statistics                                      |
+| **9**  | Exit                                                    |
 
-3. The program will display all loaded words organized by their first letter.
+## Word File Format
 
-4. Use the menu to explore various word relationships:
-   - **0**: Display detailed information about a specific word
-   - **1**: Show subword chains
-   - **2**: Show verb forms (-ed/-ing)
-   - **3**: Show words formed by adding one character (not yet implemented)
-   - **4**: Show lexically close words
-   - **5**: Show anagrams
-   - **6**: Insert a new word
-   - **7**: Delete a word
-   - **8**: Display statistics
-   - **9**: Exit
-
-## Input File Format
-
-The input file should contain one word per line or words separated by whitespace. Syllables within words should be separated by forward slashes:
+Words in `words.txt` should have syllables separated by forward slashes:
 
 ```
 hel/lo
 world
 pro/gram/ming
-an/a/lyze
+ed/u/ca/tion
 ```
 
-## Code Organization
+## Project Structure
 
-### Modules
+```
+├── main.c              # Program entry point
+├── english_words.h     # Core data structures and API
+├── ui.h/ui.c          # User interface
+├── word_analysis.c     # Character and word analysis
+├── word_node.c         # Memory management and list operations
+├── file_io.c          # File I/O operations
+├── relationships.c     # Relationship creation algorithms
+├── verb_forms.c       # Verb conjugation rules
+├── display.c          # Relationship display
+├── Makefile           # Build configuration
+└── words.txt          # Word database
+```
 
-- **word_analysis**: Low-level character and word analysis
-- **word_node**: Memory management and linked list operations
-- **file_io**: Reading words from files
-- **relationships**: Creating links between related words
-- **verb_forms**: Generating verb conjugations
-- **display**: Printing relationship chains
-- **ui**: User interaction and menu handling
+## Technical Details
 
-### Key Data Structures
+### Data Structures
+- **WordNode** - Doubly-linked list node containing word properties and relationship pointers
+- **Syllable** - Linked list for syllable storage
+- **LetterList** - 26 lists (A-Z) for efficient word organization
 
-- **WordNode**: Represents a word with all its properties and relationships
-- **Syllable**: Linked list node for syllable storage
-- **LetterList**: Container for words starting with the same letter
-- **Statistics**: Holds program statistics
+### Algorithms
+- **Subword Detection** - Pattern matching with separation tracking
+- **Verb Generation** - Rule-based conjugation (CVC doubling, silent-e handling, etc.)
+- **Lexical Distance** - Single-character difference detection
+- **Anagram Detection** - Sorted character comparison
 
-## Platform Support
+### Constraints
+- Maximum 1000 words
+- Maximum 50 characters per word
+- Maximum 10 characters per syllable
 
-The program is cross-platform compatible:
-- **Windows**: Uses `cls` to clear the screen
-- **Unix/Linux/macOS**: Uses `clear` to clear the screen
+## Requirements
+
+- **Compiler** - GCC with C99 support
+- **Build System** - GNU Make
+- **Platform** - Cross-platform (Windows/Linux/macOS)
 
 ## Memory Management
 
-The program properly manages dynamic memory:
-- All allocated nodes are tracked
-- `cleanup_word_lists()` frees all memory before exit
-- No memory leaks under normal operation
+All dynamic memory is properly tracked and freed. Use valgrind to verify:
+```bash
+valgrind --leak-check=full ./english_words
+```
 
-## Limitations
+## Examples
 
-- Maximum 1000 words per file
-- Maximum 50 characters per word
-- Maximum 10 characters per syllable
-- The "add one character" feature is not yet implemented
+### Subword Chain
+```
+art --> start --> restart --> (end)
+```
+
+### Verb Forms
+```
+study --> studied --> studying
+```
+
+### Lexically Close
+```
+cat --> bat --> hat --> mat --> (end)
+```
+
+### Anagrams
+```
+listen --> silent --> enlist --> (end)
+```
 
 ## Contributing
 
-When contributing, please:
-1. Follow the existing code style
-2. Add comments for complex logic
-3. Update this README for new features
-4. Test on both Windows and Unix-like systems
+This is an academic project from École Nationale Supérieure d'Informatique (ESI).
 
-## License
-
-This project was created as part of an academic assignment at École Nationale Supérieure d'Informatique (ESI).
-
-## Authors
-
-Original implementation: Mohamed El Amine Kherroubi, Ahcen Chabbi
-Refactored version: 2025
+**Authors:** Mohamed El Amine Kherroubi, Ahcen Chabbi  
+**Refactored:** 2025

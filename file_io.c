@@ -76,6 +76,22 @@ bool save_word_to_file(const char *word) {
     return false;
   }
 
+  /* Check if file is empty or ends with newline */
+  fseek(file, 0, SEEK_END);
+  long file_size = ftell(file);
+
+  if (file_size > 0) {
+    /* Check the last character */
+    fseek(file, -1, SEEK_END);
+    int last_char = fgetc(file);
+
+    /* If file doesn't end with newline, add one before the new word */
+    if (last_char != '\n' && last_char != EOF) {
+      fprintf(file, "\n");
+    }
+  }
+
+  /* Write the word followed by newline */
   fprintf(file, "%s\n", word);
   fclose(file);
   return true;
