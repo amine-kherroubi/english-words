@@ -3,50 +3,56 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -pedantic -O2
 TARGET = english_words
-OBJS = main.o word_analysis.o word_node.o file_io.o relationships.o verb_forms.o display.o ui.o
+BUILD_DIR = build
+SRC_FILES = main.c word_analysis.c word_node.c file_io.c relationships.c verb_forms.c display.c ui.c
+OBJS = $(SRC_FILES:%.c=$(BUILD_DIR)/%.o)
 
 # Default target
-all: $(TARGET)
+all: $(BUILD_DIR) $(TARGET)
+
+# Create build directory
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
 # Link all object files
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
 
 # Compile main
-main.o: main.c english_words.h ui.h
-	$(CC) $(CFLAGS) -c main.c
+$(BUILD_DIR)/main.o: main.c english_words.h ui.h
+	$(CC) $(CFLAGS) -c main.c -o $(BUILD_DIR)/main.o
 
 # Compile word analysis module
-word_analysis.o: word_analysis.c english_words.h
-	$(CC) $(CFLAGS) -c word_analysis.c
+$(BUILD_DIR)/word_analysis.o: word_analysis.c english_words.h
+	$(CC) $(CFLAGS) -c word_analysis.c -o $(BUILD_DIR)/word_analysis.o
 
 # Compile word node module
-word_node.o: word_node.c english_words.h
-	$(CC) $(CFLAGS) -c word_node.c
+$(BUILD_DIR)/word_node.o: word_node.c english_words.h
+	$(CC) $(CFLAGS) -c word_node.c -o $(BUILD_DIR)/word_node.o
 
 # Compile file I/O module
-file_io.o: file_io.c english_words.h
-	$(CC) $(CFLAGS) -c file_io.c
+$(BUILD_DIR)/file_io.o: file_io.c english_words.h
+	$(CC) $(CFLAGS) -c file_io.c -o $(BUILD_DIR)/file_io.o
 
 # Compile relationships module
-relationships.o: relationships.c english_words.h
-	$(CC) $(CFLAGS) -c relationships.c
+$(BUILD_DIR)/relationships.o: relationships.c english_words.h
+	$(CC) $(CFLAGS) -c relationships.c -o $(BUILD_DIR)/relationships.o
 
 # Compile verb forms module
-verb_forms.o: verb_forms.c english_words.h
-	$(CC) $(CFLAGS) -c verb_forms.c
+$(BUILD_DIR)/verb_forms.o: verb_forms.c english_words.h
+	$(CC) $(CFLAGS) -c verb_forms.c -o $(BUILD_DIR)/verb_forms.o
 
 # Compile display module
-display.o: display.c english_words.h
-	$(CC) $(CFLAGS) -c display.c
+$(BUILD_DIR)/display.o: display.c english_words.h
+	$(CC) $(CFLAGS) -c display.c -o $(BUILD_DIR)/display.o
 
 # Compile UI module
-ui.o: ui.c ui.h english_words.h
-	$(CC) $(CFLAGS) -c ui.c
+$(BUILD_DIR)/ui.o: ui.c ui.h english_words.h
+	$(CC) $(CFLAGS) -c ui.c -o $(BUILD_DIR)/ui.o
 
 # Clean build artifacts
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -rf $(BUILD_DIR) $(TARGET)
 
 # Clean and rebuild
 rebuild: clean all

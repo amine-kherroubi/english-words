@@ -1,0 +1,23 @@
+# Build directory
+build/
+
+# Executable
+english_words
+english_words.exe
+
+# Object files
+*.o
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test output
+*.log

@@ -9,7 +9,7 @@
 
 char *generate_ing_form(const char *verb) {
   int len = strlen(verb);
-  char *ing_form = (char *)malloc(len + 4);
+  char *ing_form = (char *)malloc(len + 5); /* Extra space for safety */
 
   if (ing_form == NULL) {
     return NULL;
@@ -29,9 +29,9 @@ char *generate_ing_form(const char *verb) {
       strcat(ing_form, "ing");
     } else {
       /* Replace 'e' with "ing" */
-      strcpy(ing_form, verb);
-      ing_form[len - 1] = 'i';
-      strcat(ing_form, "ng");
+      strncpy(ing_form, verb, len - 1);
+      ing_form[len - 1] = '\0';
+      strcat(ing_form, "ing");
     }
   }
   /* If verb ends with consonant-vowel-consonant (CVC) pattern */
@@ -40,8 +40,8 @@ char *generate_ing_form(const char *verb) {
            is_vowel(verb[len - 2]) && is_consonant(verb[len - 3])) {
     /* Double the last consonant and add "ing" */
     strcpy(ing_form, verb);
-    char last[2] = {verb[len - 1], '\0'};
-    strcat(ing_form, last);
+    ing_form[len] = verb[len - 1];
+    ing_form[len + 1] = '\0';
     strcat(ing_form, "ing");
   } else {
     /* Default: just add "ing" */
@@ -54,7 +54,7 @@ char *generate_ing_form(const char *verb) {
 
 char *generate_ed_form(const char *verb) {
   int len = strlen(verb);
-  char *ed_form = (char *)malloc(len + 3);
+  char *ed_form = (char *)malloc(len + 5); /* Extra space for safety */
 
   if (ed_form == NULL) {
     return NULL;
@@ -90,8 +90,8 @@ char *generate_ed_form(const char *verb) {
       is_consonant(verb[len - 3])) {
     /* Double the last consonant and add "ed" */
     strcpy(ed_form, verb);
-    char last[2] = {verb[len - 1], '\0'};
-    strcat(ed_form, last);
+    ed_form[len] = verb[len - 1];
+    ed_form[len + 1] = '\0';
     strcat(ed_form, "ed");
   }
   /* If verb already ends with "ed" */
@@ -105,9 +105,9 @@ char *generate_ed_form(const char *verb) {
   }
   /* If verb ends with consonant + 'y' */
   else if (len >= 2 && verb[len - 1] == 'y' && is_consonant(verb[len - 2])) {
-    strcpy(ed_form, verb);
-    ed_form[len - 1] = 'i';
-    strcat(ed_form, "ed");
+    strncpy(ed_form, verb, len - 1);
+    ed_form[len - 1] = '\0';
+    strcat(ed_form, "ied");
   } else {
     /* Default: just add "ed" */
     strcpy(ed_form, verb);

@@ -18,9 +18,25 @@ static int read_words_to_array(const char *filename,
   }
 
   int count = 0;
-  while (count < MAX_WORDS && !feof(file)) {
-    if (fscanf(file, "%49s", words[count]) == 1) {
-      count++;
+  char buffer[512]; /* Buffer for reading lines */
+
+  while (count < MAX_WORDS && fgets(buffer, sizeof(buffer), file) != NULL) {
+    /* Parse multiple words from the line */
+    char *token = strtok(buffer, " \t\n\r");
+
+    while (token != NULL && count < MAX_WORDS) {
+      size_t len = strlen(token);
+
+      /* Check if word fits in our array */
+      if (len > 0 && len < MAX_WORD_LENGTH) {
+        strncpy(words[count], token, MAX_WORD_LENGTH - 1);
+        words[count][MAX_WORD_LENGTH - 1] = '\0';
+        count++;
+      } else if (len >= MAX_WORD_LENGTH) {
+        fprintf(stderr, "Warning: Word too long, skipping: %.20s...\n", token);
+      }
+
+      token = strtok(NULL, " \t\n\r");
     }
   }
 

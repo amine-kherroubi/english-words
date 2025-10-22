@@ -5,6 +5,7 @@
 #include "ui.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef _WIN32
 #define CLEAR_COMMAND "cls"
@@ -12,12 +13,18 @@
 #define CLEAR_COMMAND "clear"
 #endif
 
-void ui_clear_screen(void) { system(CLEAR_COMMAND); }
+void ui_clear_screen(void) {
+  int result = system(CLEAR_COMMAND);
+  (void)result; /* Suppress unused variable warning */
+}
 
 void ui_wait_for_enter(void) {
   printf("\nPress ENTER to continue...");
-  getchar();
-  getchar();
+  fflush(stdout);
+  /* Just wait for a single enter - the buffer should already be clean */
+  int c;
+  while ((c = getchar()) != '\n' && c != EOF)
+    ;
 }
 
 void ui_display_menu(void) {
@@ -33,15 +40,35 @@ void ui_display_menu(void) {
   puts("8) Display statistics");
   puts("9) Exit");
   printf("\nYour choice: ");
+  fflush(stdout);
 }
 
 void handle_print_word_data(void) {
   char word[MAX_WORD_LENGTH];
+  char input[MAX_WORD_LENGTH + 10];
+
   printf("Enter a word: ");
-  if (scanf("%49s", word) != 1) {
+  fflush(stdout);
+
+  if (fgets(input, sizeof(input), stdin) == NULL) {
     puts("Invalid input.");
     return;
   }
+
+  /* Remove trailing newline and extract word */
+  size_t len = strlen(input);
+  if (len > 0 && input[len - 1] == '\n') {
+    input[len - 1] = '\0';
+    len--;
+  }
+
+  if (len == 0 || len >= MAX_WORD_LENGTH) {
+    puts("Invalid word length.");
+    return;
+  }
+
+  strncpy(word, input, MAX_WORD_LENGTH - 1);
+  word[MAX_WORD_LENGTH - 1] = '\0';
 
   ui_clear_screen();
 
@@ -106,11 +133,30 @@ void handle_print_anagrams(int link_count) {
 
 void handle_insert_word(void) {
   char word[MAX_WORD_LENGTH];
+  char input[MAX_WORD_LENGTH + 10];
+
   printf("Enter a word to insert (separate syllables with '/'): ");
-  if (scanf("%49s", word) != 1) {
+  fflush(stdout);
+
+  if (fgets(input, sizeof(input), stdin) == NULL) {
     puts("Invalid input.");
     return;
   }
+
+  /* Remove trailing newline and extract word */
+  size_t len = strlen(input);
+  if (len > 0 && input[len - 1] == '\n') {
+    input[len - 1] = '\0';
+    len--;
+  }
+
+  if (len == 0 || len >= MAX_WORD_LENGTH) {
+    puts("Invalid word length.");
+    return;
+  }
+
+  strncpy(word, input, MAX_WORD_LENGTH - 1);
+  word[MAX_WORD_LENGTH - 1] = '\0';
 
   ui_clear_screen();
 
@@ -125,11 +171,30 @@ void handle_insert_word(void) {
 
 void handle_delete_word(void) {
   char word[MAX_WORD_LENGTH];
+  char input[MAX_WORD_LENGTH + 10];
+
   printf("Enter a word to delete: ");
-  if (scanf("%49s", word) != 1) {
+  fflush(stdout);
+
+  if (fgets(input, sizeof(input), stdin) == NULL) {
     puts("Invalid input.");
     return;
   }
+
+  /* Remove trailing newline and extract word */
+  size_t len = strlen(input);
+  if (len > 0 && input[len - 1] == '\n') {
+    input[len - 1] = '\0';
+    len--;
+  }
+
+  if (len == 0 || len >= MAX_WORD_LENGTH) {
+    puts("Invalid word length.");
+    return;
+  }
+
+  strncpy(word, input, MAX_WORD_LENGTH - 1);
+  word[MAX_WORD_LENGTH - 1] = '\0';
 
   ui_clear_screen();
 
@@ -153,15 +218,21 @@ void handle_print_stats(const Statistics *stats) {
 }
 
 void ui_main_menu_loop(const Statistics *stats) {
+  char input[100];
   int choice;
 
   while (1) {
     ui_display_menu();
 
-    if (scanf("%d", &choice) != 1) {
-      /* Clear invalid input */
-      while (getchar() != '\n')
-        ;
+    if (fgets(input, sizeof(input), stdin) == NULL) {
+      ui_clear_screen();
+      puts("Error reading input.");
+      print_all_word_lists();
+      continue;
+    }
+
+    /* Try to parse the choice */
+    if (sscanf(input, "%d", &choice) != 1) {
       ui_clear_screen();
       puts("Invalid choice. Please enter a number.");
       print_all_word_lists();

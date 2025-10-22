@@ -13,11 +13,11 @@ bool is_subword(const char *smaller, const char *larger) {
   int smaller_len = strlen(smaller);
   int larger_len = strlen(larger);
 
-  if (smaller_len > larger_len) {
+  if (smaller_len > larger_len || smaller_len == 0) {
     return false;
   }
 
-  char *temp = (char *)malloc(smaller_len + 1);
+  char *temp = (char *)malloc(smaller_len + 2); /* Extra byte for safety */
   if (temp == NULL) {
     return false;
   }
@@ -30,7 +30,8 @@ bool is_subword(const char *smaller, const char *larger) {
       temp[j] = larger[i];
       j++;
 
-      if (i < larger_len - 1 && larger[i + 1] != smaller[j]) {
+      if (i < larger_len - 1 && j < smaller_len &&
+          larger[i + 1] != smaller[j]) {
         separations++;
       }
     } else {
@@ -98,11 +99,14 @@ int create_subword_links(void) {
                 strlen(candidate->clean_word) <
                     strlen(current->subword_of->clean_word)) {
               current->subword_of = candidate;
-              link_count++;
             }
           }
           candidate = candidate->next;
         }
+      }
+
+      if (current->subword_of != NULL) {
+        link_count++;
       }
 
       current = current->next;
@@ -127,10 +131,15 @@ int create_verb_form_links(void) {
       /* Check for -ing form */
       char *ing = generate_ing_form(current->clean_word);
       if (ing != NULL) {
-        WordNode *ing_node = search_word(g_word_lists[i].head, ing);
-        if (ing_node != NULL && ing_node != current) {
-          current->ing_form = ing_node;
-          link_count++;
+        /* Search in all lists since the -ing form might start with a different
+         * letter */
+        for (int k = 0; k < ALPHABET_SIZE; k++) {
+          WordNode *ing_node = search_word(g_word_lists[k].head, ing);
+          if (ing_node != NULL && ing_node != current) {
+            current->ing_form = ing_node;
+            link_count++;
+            break;
+          }
         }
         free(ing);
       }
@@ -138,10 +147,15 @@ int create_verb_form_links(void) {
       /* Check for -ed form */
       char *ed = generate_ed_form(current->clean_word);
       if (ed != NULL) {
-        WordNode *ed_node = search_word(g_word_lists[i].head, ed);
-        if (ed_node != NULL && ed_node != current) {
-          current->ed_form = ed_node;
-          link_count++;
+        /* Search in all lists since the -ed form might start with a different
+         * letter */
+        for (int k = 0; k < ALPHABET_SIZE; k++) {
+          WordNode *ed_node = search_word(g_word_lists[k].head, ed);
+          if (ed_node != NULL && ed_node != current) {
+            current->ed_form = ed_node;
+            link_count++;
+            break;
+          }
         }
         free(ed);
       }

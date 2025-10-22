@@ -7,6 +7,7 @@
 #include "ui.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int main(void) {
   char filename[MAX_FILENAME_LENGTH];
@@ -15,10 +16,17 @@ int main(void) {
   puts("English Words Analysis Program");
   puts("==============================\n");
   printf("Enter the path to the word list file: ");
+  fflush(stdout);
 
-  if (scanf("%99s", filename) != 1) {
+  if (fgets(filename, sizeof(filename), stdin) == NULL) {
     puts("Error reading filename.");
     return EXIT_FAILURE;
+  }
+
+  /* Remove trailing newline if present */
+  size_t len = strlen(filename);
+  if (len > 0 && filename[len - 1] == '\n') {
+    filename[len - 1] = '\0';
   }
 
   ui_clear_screen();
