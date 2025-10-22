@@ -8,7 +8,7 @@
  * - More robust chain traversal
  */
 
-#include "english_words.h"
+#include "../../include/english_words.h"
 #include <stdio.h>
 
 #define MAX_CHAIN_LENGTH 100

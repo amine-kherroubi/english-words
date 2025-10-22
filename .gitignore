@@ -1,12 +1,17 @@
 # Build directory
 build/
+*.out
 
-# Executable
+# Executables
 english_words
 english_words.exe
+*.exe
 
 # Object files
 *.o
+*.obj
+*.a
+*.lib
 
 # Editor files
 *.swp
@@ -14,10 +19,41 @@ english_words.exe
 *~
 .vscode/
 .idea/
+*.sublime-*
 
 # OS files
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
 
 # Test output
 *.log
+test_output/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Core dumps
+core
+core.*
+
+# Data backups (keep original)
+data/*.backup
+data/*~
+
+# Documentation builds
+docs/_build/
+docs/*.pdf
+
+# CMake (if added later)
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake

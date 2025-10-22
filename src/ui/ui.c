@@ -7,7 +7,7 @@
  * - Safer string handling
  */
 
-#include "ui.h"
+#include "../../include/ui.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>

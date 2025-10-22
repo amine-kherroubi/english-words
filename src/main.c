@@ -1,14 +1,16 @@
 /**
  * English Words Analysis Program
  * Analyzes English words and creates relationships between them
+ *
+ * Updated for new project structure
  */
 
-#include "english_words.h"
-#include "ui.h"
+#include "../include/english_words.h"
+#include "../include/ui.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-#define WORDS_FILE "words.txt"
+#define WORDS_FILE "../data/words.txt"
 
 int main(void) {
   ui_clear_screen();
@@ -20,7 +22,8 @@ int main(void) {
   int word_count = load_words_from_file(WORDS_FILE);
   if (word_count == -1) {
     printf("Error: Unable to open file '%s'.\n", WORDS_FILE);
-    printf("Make sure the file exists in the current directory.\n");
+    printf("Make sure the file exists in the data directory.\n");
+    printf("Current working directory should be: build/bin/\n");
     return EXIT_FAILURE;
   }
 

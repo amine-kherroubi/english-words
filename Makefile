@@ -1,60 +1,152 @@
 # Makefile for English Words Analysis Program
 
+# Compiler settings
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -pedantic -O2
-TARGET = english_words
+CFLAGS = -Wall -Wextra -std=c99 -pedantic -O2 -Iinclude
+LDFLAGS = 
+
+# Directories
+SRC_DIR = src
+CORE_DIR = $(SRC_DIR)/core
+IO_DIR = $(SRC_DIR)/io
+UTILS_DIR = $(SRC_DIR)/utils
+UI_DIR = $(SRC_DIR)/ui
 BUILD_DIR = build
-SRC_FILES = main.c word_analysis.c word_node.c file_io.c relationships.c verb_forms.c display.c ui.c
-OBJS = $(SRC_FILES:%.c=$(BUILD_DIR)/%.o)
+OBJ_DIR = $(BUILD_DIR)/obj
+BIN_DIR = $(BUILD_DIR)/bin
+INCLUDE_DIR = include
+DATA_DIR = data
+
+# Target
+TARGET = $(BIN_DIR)/english_words
+
+# Source files
+SRCS = $(SRC_DIR)/main.c \
+       $(CORE_DIR)/word_analysis.c \
+       $(CORE_DIR)/word_node.c \
+       $(CORE_DIR)/relationships.c \
+       $(IO_DIR)/file_io.c \
+       $(IO_DIR)/display.c \
+       $(UTILS_DIR)/verb_forms.c \
+       $(UI_DIR)/ui.c
+
+# Object files
+OBJS = $(OBJ_DIR)/main.o \
+       $(OBJ_DIR)/word_analysis.o \
+       $(OBJ_DIR)/word_node.o \
+       $(OBJ_DIR)/relationships.o \
+       $(OBJ_DIR)/file_io.o \
+       $(OBJ_DIR)/display.o \
+       $(OBJ_DIR)/verb_forms.o \
+       $(OBJ_DIR)/ui.o
 
 # Default target
-all: $(BUILD_DIR) $(TARGET)
+.PHONY: all
+all: directories $(TARGET)
 
-# Create build directory
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+# Create necessary directories
+.PHONY: directories
+directories:
+	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(BIN_DIR)
 
-# Link all object files
+# Link executable
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
+	@echo "Linking $@..."
+	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	@echo "Build successful!"
 
 # Compile main
-$(BUILD_DIR)/main.o: main.c english_words.h ui.h
-	$(CC) $(CFLAGS) -c main.c -o $(BUILD_DIR)/main.o
+$(OBJ_DIR)/main.o: $(SRC_DIR)/main.c $(INCLUDE_DIR)/english_words.h $(INCLUDE_DIR)/ui.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c $< -o $@
 
-# Compile word analysis module
-$(BUILD_DIR)/word_analysis.o: word_analysis.c english_words.h
-	$(CC) $(CFLAGS) -c word_analysis.c -o $(BUILD_DIR)/word_analysis.o
+# Compile core modules
+$(OBJ_DIR)/word_analysis.o: $(CORE_DIR)/word_analysis.c $(INCLUDE_DIR)/english_words.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c $< -o $@
 
-# Compile word node module
-$(BUILD_DIR)/word_node.o: word_node.c english_words.h
-	$(CC) $(CFLAGS) -c word_node.c -o $(BUILD_DIR)/word_node.o
+$(OBJ_DIR)/word_node.o: $(CORE_DIR)/word_node.c $(INCLUDE_DIR)/english_words.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c $< -o $@
 
-# Compile file I/O module
-$(BUILD_DIR)/file_io.o: file_io.c english_words.h
-	$(CC) $(CFLAGS) -c file_io.c -o $(BUILD_DIR)/file_io.o
+$(OBJ_DIR)/relationships.o: $(CORE_DIR)/relationships.c $(INCLUDE_DIR)/english_words.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c $< -o $@
 
-# Compile relationships module
-$(BUILD_DIR)/relationships.o: relationships.c english_words.h
-	$(CC) $(CFLAGS) -c relationships.c -o $(BUILD_DIR)/relationships.o
+# Compile I/O modules
+$(OBJ_DIR)/file_io.o: $(IO_DIR)/file_io.c $(INCLUDE_DIR)/english_words.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c $< -o $@
 
-# Compile verb forms module
-$(BUILD_DIR)/verb_forms.o: verb_forms.c english_words.h
-	$(CC) $(CFLAGS) -c verb_forms.c -o $(BUILD_DIR)/verb_forms.o
+$(OBJ_DIR)/display.o: $(IO_DIR)/display.c $(INCLUDE_DIR)/english_words.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c $< -o $@
 
-# Compile display module
-$(BUILD_DIR)/display.o: display.c english_words.h
-	$(CC) $(CFLAGS) -c display.c -o $(BUILD_DIR)/display.o
+# Compile utility modules
+$(OBJ_DIR)/verb_forms.o: $(UTILS_DIR)/verb_forms.c $(INCLUDE_DIR)/english_words.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile UI module
-$(BUILD_DIR)/ui.o: ui.c ui.h english_words.h
-	$(CC) $(CFLAGS) -c ui.c -o $(BUILD_DIR)/ui.o
+$(OBJ_DIR)/ui.o: $(UI_DIR)/ui.c $(INCLUDE_DIR)/ui.h $(INCLUDE_DIR)/english_words.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+# Run the program
+.PHONY: run
+run: all
+	@cd $(DATA_DIR) && ../$(TARGET)
 
 # Clean build artifacts
+.PHONY: clean
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET)
+	@echo "Cleaning build artifacts..."
+	@rm -rf $(BUILD_DIR)
+	@echo "Clean complete!"
 
-# Clean and rebuild
+# Full rebuild
+.PHONY: rebuild
 rebuild: clean all
 
-.PHONY: all clean rebuild
+# Debug build
+.PHONY: debug
+debug: CFLAGS += -g -DDEBUG
+debug: clean all
+
+# Release build
+.PHONY: release
+release: CFLAGS += -O3 -DNDEBUG
+release: clean all
+
+# Check for memory leaks (requires valgrind)
+.PHONY: memcheck
+memcheck: debug
+	@cd $(DATA_DIR) && valgrind --leak-check=full --show-leak-kinds=all ../$(TARGET)
+
+# Static analysis (requires cppcheck)
+.PHONY: analyze
+analyze:
+	@cppcheck --enable=all --std=c99 --suppress=missingIncludeSystem $(SRC_DIR)
+
+# Display help
+.PHONY: help
+help:
+	@echo "Available targets:"
+	@echo "  all       - Build the project (default)"
+	@echo "  run       - Build and run the program"
+	@echo "  clean     - Remove build artifacts"
+	@echo "  rebuild   - Clean and rebuild"
+	@echo "  debug     - Build with debug symbols"
+	@echo "  release   - Build optimized release version"
+	@echo "  memcheck  - Run with valgrind memory checker"
+	@echo "  analyze   - Run static analysis with cppcheck"
+	@echo "  help      - Display this help message"
+
+.PHONY: info
+info:
+	@echo "Project: English Words Analysis"
+	@echo "Compiler: $(CC)"
+	@echo "Flags: $(CFLAGS)"
+	@echo "Target: $(TARGET)"
+	@echo "Sources: $(SRCS)"

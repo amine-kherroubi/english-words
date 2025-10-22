@@ -8,7 +8,7 @@
  * - Safer buffer handling
  */
 
-#include "english_words.h"
+#include "../../include/english_words.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
