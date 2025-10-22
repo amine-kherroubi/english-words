@@ -195,4 +195,4 @@ listen --> silent --> enlist --> (end)
 **Academic Project:** École Nationale Supérieure d'Informatique (ESI)
 
 **Original Authors:** Mohamed El Amine Kherroubi, Ahcen Chabbi (2023)  
-**Refactored by:** Mohamed El Amine, Claude AI (2025)
+**Refactored by:** Mohamed El Amine Kherroubi, Claude AI (2025)
