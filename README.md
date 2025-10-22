@@ -173,8 +173,6 @@ listen --> silent --> enlist --> (end)
 ## Changelog
 
 ### Version 2.0 (2025 Refactor)
-- Fixed Makefile to run from project root
-- Renamed data → persistence directory
 - Added comprehensive error handling
 - Fixed memory leaks in verb generation
 - Improved circular chain detection
