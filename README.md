@@ -11,7 +11,7 @@ A C program that analyzes English words and discovers linguistic relationships i
 - **Enhanced null checking** - All functions now validate input pointers
 
 ### Algorithm Improvements
-- **Circular chain detection** - Prevents infinite loops in relationship chains (display.c)
+- **Circular chain detection** - Prevents infinite loops in relationship chains
 - **Robust word validation** - Added `is_valid_word_format()` function
 - **Better file I/O** - More robust file reading with validation
 - **Safer string operations** - Using `strncpy` and proper null termination
@@ -45,7 +45,12 @@ make
 
 ### Run
 ```bash
-./english_words
+make run
+```
+
+Or directly:
+```bash
+./build/bin/english_words
 ```
 
 ### Clean
@@ -56,7 +61,7 @@ make rebuild    # Clean and rebuild
 
 ## Usage
 
-The program loads words from `words.txt` on startup and displays them organized by first letter. Use the interactive menu to explore relationships:
+The program loads words from `persistence/words.txt` on startup and displays them organized by first letter. Use the interactive menu to explore relationships:
 
 | Option | Action                                                  |
 | ------ | ------------------------------------------------------- |
@@ -73,7 +78,7 @@ The program loads words from `words.txt` on startup and displays them organized 
 
 ## Word File Format
 
-Words in `words.txt` should have syllables separated by forward slashes:
+Words in `persistence/words.txt` should have syllables separated by forward slashes:
 
 ```
 hel/lo
@@ -85,17 +90,31 @@ ed/u/ca/tion
 ## Project Structure
 
 ```
-├── main.c              # Program entry point
-├── english_words.h     # Core data structures and API
-├── ui.h/ui.c          # User interface
-├── word_analysis.c     # Character and word analysis
-├── word_node.c         # Memory management and list operations
-├── file_io.c          # File I/O operations
-├── relationships.c     # Relationship creation algorithms
-├── verb_forms.c       # Verb conjugation rules
-├── display.c          # Relationship display
-├── Makefile           # Build configuration
-└── words.txt          # Word database
+.
+├── include/
+│   ├── english_words.h     # Core data structures and API
+│   └── ui.h               # User interface declarations
+├── src/
+│   ├── main.c             # Program entry point
+│   ├── core/
+│   │   ├── word_analysis.c    # Character and word analysis
+│   │   ├── word_node.c        # Memory management and list operations
+│   │   └── relationships.c    # Relationship creation algorithms
+│   ├── io/
+│   │   ├── file_io.c          # File I/O operations
+│   │   └── display.c          # Relationship display
+│   ├── utils/
+│   │   └── verb_forms.c       # Verb conjugation rules
+│   └── ui/
+│       └── ui.c               # User interface implementation
+├── persistence/
+│   └── words.txt          # Word database
+├── build/                 # Build artifacts (generated)
+│   ├── obj/              # Object files
+│   └── bin/              # Executable
+├── Makefile              # Build configuration
+├── .gitignore            # Git ignore rules
+└── README.md             # This file
 ```
 
 ## Technical Details
@@ -134,7 +153,7 @@ ed/u/ca/tion
 
 All dynamic memory is properly tracked and freed. Use valgrind to verify:
 ```bash
-valgrind --leak-check=full ./english_words
+make memcheck
 ```
 
 ## Examples
@@ -169,6 +188,8 @@ This is an academic project from École Nationale Supérieure d'Informatique (ES
 ## Changelog
 
 ### Version 2.0 (2025 Refactor)
+- Fixed Makefile to run from project root
+- Renamed data → persistence directory
 - Added comprehensive error handling
 - Fixed memory leaks in verb generation
 - Improved circular chain detection

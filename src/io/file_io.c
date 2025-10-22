@@ -1,17 +1,14 @@
 /**
  * File Input/Output Operations
  * Reading words from files
- *
- * Improvements:
- * - Better error handling
- * - More robust file reading
- * - Safer buffer handling
  */
 
 #include "../../include/english_words.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
+
+#define WORDS_FILE_PATH "persistence/words.txt"
 
 /* Global word lists definition */
 LetterList g_word_lists[ALPHABET_SIZE + 1];
@@ -121,7 +118,7 @@ bool save_word_to_file(const char *word) {
     return false;
   }
 
-  FILE *file = fopen("words.txt", "a");
+  FILE *file = fopen(WORDS_FILE_PATH, "a");
   if (file == NULL) {
     perror("Error opening file for append");
     return false;
@@ -153,7 +150,7 @@ bool save_word_to_file(const char *word) {
 }
 
 bool save_all_words_to_file(void) {
-  FILE *file = fopen("words.txt", "w");
+  FILE *file = fopen(WORDS_FILE_PATH, "w");
   if (file == NULL) {
     perror("Error opening file for writing");
     return false;

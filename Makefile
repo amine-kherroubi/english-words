@@ -9,13 +9,12 @@ LDFLAGS =
 SRC_DIR = src
 CORE_DIR = $(SRC_DIR)/core
 IO_DIR = $(SRC_DIR)/io
-UTILS_DIR = $(SRC_DIR)/utils
 UI_DIR = $(SRC_DIR)/ui
 BUILD_DIR = build
 OBJ_DIR = $(BUILD_DIR)/obj
 BIN_DIR = $(BUILD_DIR)/bin
 INCLUDE_DIR = include
-DATA_DIR = data
+DATA_DIR = persistence
 
 # Target
 TARGET = $(BIN_DIR)/english_words
@@ -25,9 +24,9 @@ SRCS = $(SRC_DIR)/main.c \
        $(CORE_DIR)/word_analysis.c \
        $(CORE_DIR)/word_node.c \
        $(CORE_DIR)/relationships.c \
+       $(CORE_DIR)/verb_forms.c \
        $(IO_DIR)/file_io.c \
        $(IO_DIR)/display.c \
-       $(UTILS_DIR)/verb_forms.c \
        $(UI_DIR)/ui.c
 
 # Object files
@@ -35,9 +34,9 @@ OBJS = $(OBJ_DIR)/main.o \
        $(OBJ_DIR)/word_analysis.o \
        $(OBJ_DIR)/word_node.o \
        $(OBJ_DIR)/relationships.o \
+       $(OBJ_DIR)/verb_forms.o \
        $(OBJ_DIR)/file_io.o \
        $(OBJ_DIR)/display.o \
-       $(OBJ_DIR)/verb_forms.o \
        $(OBJ_DIR)/ui.o
 
 # Default target
@@ -74,6 +73,10 @@ $(OBJ_DIR)/relationships.o: $(CORE_DIR)/relationships.c $(INCLUDE_DIR)/english_w
 	@echo "Compiling $<..."
 	@$(CC) $(CFLAGS) -c $< -o $@
 
+$(OBJ_DIR)/verb_forms.o: $(CORE_DIR)/verb_forms.c $(INCLUDE_DIR)/english_words.h
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c $< -o $@
+
 # Compile I/O modules
 $(OBJ_DIR)/file_io.o: $(IO_DIR)/file_io.c $(INCLUDE_DIR)/english_words.h
 	@echo "Compiling $<..."
@@ -83,20 +86,15 @@ $(OBJ_DIR)/display.o: $(IO_DIR)/display.c $(INCLUDE_DIR)/english_words.h
 	@echo "Compiling $<..."
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-# Compile utility modules
-$(OBJ_DIR)/verb_forms.o: $(UTILS_DIR)/verb_forms.c $(INCLUDE_DIR)/english_words.h
-	@echo "Compiling $<..."
-	@$(CC) $(CFLAGS) -c $< -o $@
-
 # Compile UI module
 $(OBJ_DIR)/ui.o: $(UI_DIR)/ui.c $(INCLUDE_DIR)/ui.h $(INCLUDE_DIR)/english_words.h
 	@echo "Compiling $<..."
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-# Run the program
+# Run the program (from project root)
 .PHONY: run
 run: all
-	@cd $(DATA_DIR) && ../$(TARGET)
+	@$(TARGET)
 
 # Clean build artifacts
 .PHONY: clean
@@ -122,7 +120,7 @@ release: clean all
 # Check for memory leaks (requires valgrind)
 .PHONY: memcheck
 memcheck: debug
-	@cd $(DATA_DIR) && valgrind --leak-check=full --show-leak-kinds=all ../$(TARGET)
+	@valgrind --leak-check=full --show-leak-kinds=all $(TARGET)
 
 # Static analysis (requires cppcheck)
 .PHONY: analyze

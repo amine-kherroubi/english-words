@@ -1,59 +1,28 @@
-# Build directory
+# Build artifacts
 build/
-*.out
 
 # Executables
-english_words
-english_words.exe
 *.exe
+*.out
 
 # Object files
 *.o
-*.obj
 *.a
-*.lib
 
 # Editor files
-*.swp
-*.swo
-*~
 .vscode/
 .idea/
-*.sublime-*
+*.swp
+*~
 
 # OS files
 .DS_Store
 Thumbs.db
-desktop.ini
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
+# Core dumps (only in root directory)
+/core
+/core.*
 
-# Test output
-*.log
-test_output/
-
-# Backup files
-*.bak
-*.backup
-*~
-
-# Core dumps
-core
-core.*
-
-# Data backups (keep original)
-data/*.backup
-data/*~
-
-# Documentation builds
-docs/_build/
-docs/*.pdf
-
-# CMake (if added later)
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
+# Persistence backups (keep original words.txt)
+persistence/*.backup
+persistence/*~
