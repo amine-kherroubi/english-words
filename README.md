@@ -44,18 +44,18 @@ make rebuild    # Clean and rebuild
 
 The program loads words from `persistence/words.txt` on startup. Use the interactive menu to explore relationships:
 
-| Option | Action                          |
-|--------|---------------------------------|
-| **0**  | Display word information        |
-| **1**  | Show subword chains             |
-| **2**  | Show verb forms (-ed/-ing)      |
-| **3**  | Show words with one char added  |
-| **4**  | Show lexically close words      |
-| **5**  | Show anagrams                   |
-| **6**  | Insert a new word               |
-| **7**  | Delete a word                   |
-| **8**  | Display statistics              |
-| **9**  | Exit                            |
+| Option | Action                                             |
+|--------|----------------------------------------------------|
+| **0**  | Display word information                           |
+| **1**  | Show subword chains                                |
+| **2**  | Show verb forms (-ed/-ing)                         |
+| **3**  | Show words with one char added *(not implemented)* |
+| **4**  | Show lexically close words                         |
+| **5**  | Show anagrams                                      |
+| **6**  | Insert a new word                                  |
+| **7**  | Delete a word                                      |
+| **8**  | Display statistics                                 |
+| **9**  | Exit                                               |
 
 ---
 
@@ -77,23 +77,23 @@ ed/u/ca/tion
 ```
 .
 ├── include/
-│   ├── english_words.h     # Core data structures and API
-│   └── ui.h               # User interface declarations
+│   ├── english_words.h         # Core data structures and API
+│   └── ui.h                    # User interface declarations
 ├── src/
-│   ├── main.c             # Program entry point
+│   ├── main.c                  # Program entry point
 │   ├── core/
-│   │   ├── word_analysis.c    # Character and word analysis
-│   │   ├── word_node.c        # Memory management and list operations
-│   │   ├── relationships.c    # Relationship creation algorithms
-│   │   └── verb_forms.c       # Verb conjugation rules
+│   │   ├── word_analysis.c     # Character and word analysis
+│   │   ├── word_node.c         # Memory management and list operations
+│   │   ├── relationships.c     # Relationship creation algorithms
+│   │   └── verb_forms.c        # Verb conjugation rules
 │   ├── io/
-│   │   ├── file_io.c          # File I/O operations
-│   │   └── display.c          # Relationship display
+│   │   ├── file_io.c           # File I/O operations
+│   │   └── display.c           # Relationship display
 │   └── ui/
-│       └── ui.c               # User interface implementation
+│       └── ui.c                # User interface implementation
 ├── persistence/
-│   └── words.txt          # Word database
-├── build/                 # Build artifacts (generated)
+│   └── words.txt               # Word database
+├── build/                      # Build artifacts (generated)
 ├── Makefile
 ├── .gitignore
 └── README.md
