@@ -1,5 +1,9 @@
 # English Words Analysis Program
 
+![C](https://img.shields.io/badge/C-00599C?style=flat&logo=c&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-Linux-FCC624?style=flat&logo=linux&logoColor=black)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+
 A C program that analyzes English words and discovers linguistic relationships including subwords, verb conjugations, lexical proximity, and anagrams.
 
 <img width="1422" height="749" alt="image" src="https://github.com/user-attachments/assets/d4d2e3c8-f145-420f-b9f3-70396e6441ff" />
